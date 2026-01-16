@@ -1,19 +1,18 @@
-# Silentmode – POS File Transfer Demo
+# File Transfer Demo
 
 ## Overview
-This project demonstrates a pragmatic file transfer mechanism for **offline-first POS (Point of Sale)** systems.
+This project demonstrates a **pragmatic and on-demand file transfer mechanism** between multiple on-premise clients and a central server.
 
-Each on-premise POS client maintains a **persistent outbound connection** to a central server.  
-This allows the server to request data **on demand** without polling and without relying on client IP addresses.
+Each client maintains a **persistent outbound connection** to the server, allowing the server to request files **at any time** without polling and without relying on client IP addresses.
 
-The design reflects real-world retail environments where POS machines are deployed behind NATs or firewalls.
+The design is suitable for environments where clients are deployed behind NATs or firewalls and direct inbound connections are not feasible.
 
 ---
 
 ## Architecture
 
 ```
-[ POS Client ]
+[ Client ]
      |
      |  WebSocket (persistent, outbound)
      v
@@ -21,7 +20,7 @@ The design reflects real-world retail environments where POS machines are deploy
      |
      |  Command: DOWNLOAD
      v
-[ POS Client ]
+[ Client ]
      |
      |  HTTP streaming upload
      v
@@ -29,26 +28,27 @@ The design reflects real-world retail environments where POS machines are deploy
 ```
 
 ### Key Characteristics
-- No polling
-- No inbound connection to client
+- On-demand file transfer
+- No polling mechanism
+- No inbound connection to clients
 - NAT / firewall friendly
-- Scales to many outlets
-- Operationally simple
+- Scales efficiently with multiple clients
+- Simple and operationally practical
 
 ---
 
 ## Components
 
 - **/server**
-  - Cloud backend
+  - Central backend service
   - Manages connected clients
-  - Sends commands
-  - Receives streamed files
+  - Sends commands to request files
+  - Receives streamed file uploads
 
 - **/client**
-  - Lightweight POS agent
-  - Maintains persistent connection
-  - Streams files on request
+  - Lightweight client agent
+  - Maintains a persistent connection to the server
+  - Streams files upon request
   - Designed to run as a compiled binary
 
 ---
@@ -59,7 +59,7 @@ A **shared API token** is used to authenticate:
 - WebSocket connections
 - File upload requests
 
-This keeps the system secure while remaining simple and pragmatic.
+This approach keeps the system secure while remaining simple and easy to operate.
 
 ---
 
@@ -77,9 +77,9 @@ SERVER_PORT=8080
 ```
 SERVER_WS=ws://SERVER_IP:8080/ws
 SERVER_UPLOAD=http://SERVER_IP:8080/upload
-CLIENT_ID=store-001
+CLIENT_ID=client-001
 API_TOKEN=change-me
-FILE_PATH=C:\temp\file_to_download.txt
+FILE_PATH=C:\temp\file_to_transfer.txt
 ```
 
 > `.env` files are intentionally excluded from version control.
@@ -104,10 +104,10 @@ cp .env.example .env
 go run main.go
 ```
 
-For production or POS deployment, the client should be compiled into a binary:
+For deployment, the client can be compiled into a standalone binary:
 
 ```bash
-go build -o pos-agent.exe
+go build -o client-agent.exe
 ```
 
 ---
@@ -120,20 +120,20 @@ From the **server machine**:
 curl http://localhost:8080/trigger
 ```
 
-This simulates an administrative or system-initiated request to retrieve data from connected POS clients.
+This simulates a system-initiated request to retrieve a file from any connected client.
 
 ---
 
 ## Notes
 
 - Files are streamed directly to disk to avoid high memory usage
-- The client does not expose any inbound ports
-- The system is suitable for offline-first retail environments
-- Designed to be easy to operate and maintain by small engineering teams
+- Clients do not expose inbound ports
+- The system is designed for distributed environments with limited network access
+- Focused on clarity, correctness, and pragmatic system design
 
 ---
 
 ## Disclaimer
 
 This project is a **technical demonstration** intended for evaluation purposes.
-It focuses on clarity, correctness, and pragmatic system design rather than production hardening.
+It prioritizes simplicity and correctness over production hardening.
