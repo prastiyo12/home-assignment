@@ -1,4 +1,4 @@
-# Silentmode – POS File Transfer Demo
+# File Transfer Demo
 
 ## Overview
 This project demonstrates a pragmatic file transfer mechanism for **offline-first POS (Point of Sale)** systems.
